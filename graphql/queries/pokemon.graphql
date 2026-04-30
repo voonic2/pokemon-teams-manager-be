@@ -1,0 +1,17 @@
+extend type Query {
+    getPokemon(name: String!): Pokemon! @field(resolver: "App\\GraphQL\\Queries\\GetPokemon")
+}
+
+type Pokemon {
+    id: Int
+    uuid: String
+    name: String
+    image: String
+    types: [String]
+    stats: [Stat!]
+}
+
+type Stat {
+    name: String
+    value: Int
+}

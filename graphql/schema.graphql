@@ -1,0 +1,4 @@
+scalar DateTime @scalar(class: "Nuwave\\Lighthouse\\Schema\\Types\\Scalars\\DateTime")
+
+#import ./queries/pokemon-teams.graphql
+#import ./queries/pokemon.graphql

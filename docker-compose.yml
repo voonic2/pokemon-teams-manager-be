@@ -1,0 +1,75 @@
+name: pokemon-project
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    ports:
+      - "${APP_PORT:-8000}:8000"
+    volumes:
+      - .:/var/www/html
+    environment:
+      APP_ENV: local
+      APP_DEBUG: "true"
+      APP_URL: http://pokemon-teams.localhost:${APP_PORT:-8000}
+      SERVER_HOST: "0.0.0.0"
+      SERVER_PORT: "${APP_PORT:-8000}"
+      DB_CONNECTION: mysql
+      MYSQL_HOST: db-mysql
+      MYSQL_PORT: "3306"
+      MYSQL_DATABASE: pokemon_logs
+      MYSQL_USERNAME: pokemon_logs
+      MYSQL_PASSWORD: pokemon_logs
+      PGSQL_HOST: db-postgres
+      PGSQL_PORT: "5432"
+      PGSQL_DATABASE: pokemon_teams
+      PGSQL_USERNAME: pokemon_teams
+      PGSQL_PASSWORD: pokemon_teams
+      SESSION_DRIVER: file
+      CACHE_STORE: file
+      QUEUE_CONNECTION: sync
+    depends_on:
+      db-mysql:
+        condition: service_healthy
+      db-postgres:
+        condition: service_healthy
+
+  db-mysql:
+    image: mysql:8.4
+    environment:
+      MYSQL_DATABASE: pokemon_logs
+      MYSQL_USER: pokemon_logs
+      MYSQL_PASSWORD: pokemon_logs
+      MYSQL_ROOT_PASSWORD: root
+    volumes:
+      - pokemon_mysql_data:/var/lib/mysql
+    ports:
+      - "${MYSQL_PUBLISH_PORT:-33060}:3306"
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-proot"]
+      interval: 5s
+      timeout: 5s
+      retries: 15
+      start_period: 25s
+
+  db-postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: pokemon_teams
+      POSTGRES_USER: pokemon_teams
+      POSTGRES_PASSWORD: pokemon_teams
+    volumes:
+      - pokemon_postgres_data:/var/lib/postgresql/data
+    ports:
+      - "${POSTGRES_PUBLISH_PORT:-54320}:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U pokemon_teams -d pokemon_teams"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+volumes:
+  pokemon_mysql_data:
+  pokemon_postgres_data:

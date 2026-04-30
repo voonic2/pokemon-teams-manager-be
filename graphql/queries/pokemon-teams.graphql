@@ -1,0 +1,31 @@
+extend type Query {
+    pokemonTeam(
+      "Search by primary key."
+      id: Int @eq
+    ): [PokemonTeam] @all @orderBy(column: "name", direction: "asc")
+}
+
+extend type Mutation {
+    createPokemonTeam(input: CreatePokemonTeamInput! @spread): PokemonTeam! @field(resolver: "App\\GraphQL\\Mutations\\CreatePokemonTeam")
+    updatePokemonTeam(input: UpdatePokemonTeamInput! @spread): PokemonTeam! @field(resolver: "App\\GraphQL\\Mutations\\UpdatePokemonTeam")
+    deletePokemonTeam(id: Int! @eq): PokemonTeam! @delete
+}
+
+type PokemonTeam {
+    id: Int
+    name: String
+    pokemon: [Pokemon!]
+    createdAt: DateTime @rename(attribute: "created_at")
+    updatedAt: DateTime @rename(attribute: "updated_at")
+}
+
+input CreatePokemonTeamInput {
+    name: String!
+}
+
+input UpdatePokemonTeamInput {
+    id: Int!
+    action: String! @rules(apply: ["in:add,remove"])
+    pokemonId: Int!
+    pokemonUuid: String
+}
